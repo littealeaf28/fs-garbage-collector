@@ -1,32 +1,47 @@
-// use web_view::*;
+use std::thread;
 
-extern crate job_scheduler;
-use job_scheduler::{JobScheduler, Job};
+use web_view::*;
+
+use notify::{Watcher, RecursiveMode, watcher};
+use std::sync::mpsc::channel;
 use std::time::Duration;
 
 fn main() {
-    // let html_content = "<html><body><h1>Hello, World!</h1></body></html>";
+    thread::spawn(|| {
+        let html_content = "<html><body><h1>Hello, World!</h1></body></html>";
 
-    let mut sched = JobScheduler::new();
+        web_view::builder()
+            .title("FS Garbage Collector")
+            .content(Content::Html(html_content))
+            .size(320, 480)
+            .resizable(false)
+            .debug(true)
+            .user_data(())
+            .invoke_handler(|_webview, _arg| Ok(()))
+            .run()
+            .unwrap();
+    });
 
-    sched.add(Job::new("1/10 * * * * *".parse().unwrap(), || {
-        println!("Hello!");
-    }));
+        // Webview should run and pull read file
+        // Should have option to delete
+
+    // Spawn another thread that listens for specific keyboard shortcut to pull up again
+
+    // Need config to know what listening for
+    // Loop with listening for changes
+
+    // Scaling to multiple checked directories
+    let (tx, rx) = channel();
+    
+    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
+
+    watcher.watch("C:\\Users\\Tianrui\\Downloads", RecursiveMode::Recursive).unwrap();
 
     loop {
-        sched.tick();
-
-        std::thread::sleep(Duration::from_millis(500));
+        match rx.recv() {
+            // Check create event, add to file
+            Ok(e) => println!("{:?}", e),
+            Err(e) => println!("Error: {:?}", e),
+        }
     }
-
-    // web_view::builder()
-    //     .title("My Project")
-    //     .content(Content::Html(html_content))
-    //     .size(320, 480)
-    //     .resizable(false)
-    //     .debug(true)
-    //     .user_data(())
-    //     .invoke_handler(|_webview, _arg| Ok(()))
-    //     .run()
-    //     .unwrap();
 }
