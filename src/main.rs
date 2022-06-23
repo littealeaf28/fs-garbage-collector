@@ -2,7 +2,7 @@ use std::thread;
 
 use web_view::*;
 
-use notify::{Watcher, RecursiveMode, watcher};
+use notify::{Watcher, RecursiveMode, watcher, DebouncedEvent};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
@@ -35,12 +35,14 @@ fn main() {
     
     let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
 
-    watcher.watch("C:\\Users\\Tianrui\\Downloads", RecursiveMode::Recursive).unwrap();
+    // TODO: How to read from .env file?
+    watcher.watch(check_dir, RecursiveMode::Recursive).unwrap();
+    watcher.watch(check_dir_two, RecursiveMode::Recursive).unwrap();
 
     loop {
         match rx.recv() {
-            // Check create event, add to file
-            Ok(e) => println!("{:?}", e),
+            Ok(DebouncedEvent::Create(path)) => println!("{}", path.display()),
+            Ok(_e) => println!("Other event"),
             Err(e) => println!("Error: {:?}", e),
         }
     }
