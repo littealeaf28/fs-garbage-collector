@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 web-view = "0.7"
 notify = "4.0.0"
+redis = "0.21.5"
